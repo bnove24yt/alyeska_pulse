@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your business · Pulse</title>
+<meta name="description" content="Your Pulse Score.">
+<link rel="canonical" href="https://alyeskapulse.com/me">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="/assets/pulse.css">
+<meta property="og:title" content="Your business · Pulse">
+<meta property="og:description" content="Your Pulse Score.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<style>.chip{display:inline-block;padding:8px 14px;border:1px solid var(--line);border-radius:999px;margin:0 8px 8px 0;cursor:pointer;background:#fff;font-weight:600;color:var(--ink);font-family:inherit;font-size:.92rem}.chip.on{border-color:#1E8FA6;background:#E6F6F9;color:#146F82}.lst div,.hrs div{display:flex;gap:14px;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:.95rem}.lst div span,.hrs div span{color:var(--muted);flex:0 0 auto}.lst div b,.hrs div b{font-weight:600;text-align:right;overflow-wrap:anywhere}.lst div:last-child,.hrs div:last-child{border-bottom:0}</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><svg viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#0C2D56"/><path d="M5 19h6l3-8 5 14 4-10 2 4h4" fill="none" stroke="#3FD3E6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Pulse</b><small>The Alaska Merchant Pulse</small></span></a>
+  <nav class="nav" aria-label="Main"><a href="/how-it-works">How it works</a><a href="/lookup">Find your business</a><a href="/signin">Sign in</a><a class="btn btn-primary" href="/lookup">Claim your business</a></nav>
+</div></header>
+
+<main id="app" aria-live="polite"><section class="section tight" style="padding-bottom:64px"><div class="wrap"><div class="panel" style="max-width:640px"><h3>Loading your page…</h3><p>One moment while we pull your latest reading.</p><noscript><p>This page needs JavaScript to show your score.</p></noscript></div></div></section></main>
+<script>
+(function(){
+  var API='https://cl8.alyeskapos.com/webhook/',MOVES=[["Ask at the moment it goes well.", "A card on the check, a line on the receipt, a word from the server. Businesses that ask add reviews several times faster than those that wait, and the ones that come unasked skew unhappy."], ["Answer every review inside a day.", "Platforms rank responsive businesses higher and readers trust them more. A calm reply to a bad review is read by a hundred people who never see the review itself."], ["Close the gap between the room and the door.", "If dine-in and take-out disagree, the fix is usually packaging, timing or the pickup counter, not the kitchen. That is the cheapest score to move."], ["Keep the listing true.", "Wrong hours, a dead phone number or an old menu photo produce one-star reviews that have nothing to do with the food."]],ARROW="<svg viewBox=\"0 0 24 24\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg>",PLAT={"google": "Google", "yelp": "Yelp", "tripadvisor": "TripAdvisor", "opentable": "OpenTable", "doordash": "DoorDash", "ubereats": "Uber Eats", "grubhub": "Grubhub"},RATIO=3;
+  var root=document.getElementById('app');
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]})}
+  function fmt(n){return Number(n||0).toLocaleString('en-US')}
+  function g_(n){return String(Math.round(n*1e6)/1e6)}
+  function day(iso){if(!iso)return null;var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso));return m?new Date(+m[1],+m[2]-1,+m[3]):null}
+  function dfmt(iso,o){var d=day(iso);return d?d.toLocaleDateString('en-US',o):''}
+  function longD(iso){return dfmt(iso,{month:'long',day:'numeric',year:'numeric'})}
+  function shortD(iso){return dfmt(iso,{month:'short',day:'numeric',year:'numeric'})}
+  function md(iso){return dfmt(iso,{month:'short',day:'numeric'})}
+  var LS='pulse_t';
+  function lsGet(){try{return localStorage.getItem(LS)}catch(e){return null}}
+  function lsSet(v){try{localStorage.setItem(LS,v)}catch(e){}}
+  function lsDel(){try{localStorage.removeItem(LS)}catch(e){}}
+
+  function band(g){if(g==null)return null;if(g>=90)return ['Standout','b5'];if(g>=75)return ['Strong','b4'];if(g>=60)return ['Solid','b3'];if(g>=40)return ['Building','b2'];return ['Needs work','b1']}
+  function next_band(g){var t=[40,60,75,90];for(var i=0;i<t.length;i++)if(g<t[i])return t[i];return null}
+  function sparkline(pts,w,h){w=w||320;h=h||64;if(pts.length<2)return '';
+    var ys=pts.map(function(p){return p[1]}),lo=Math.min.apply(null,ys),hi=Math.max.apply(null,ys),rng=(hi-lo)||1;
+    var xs=pts.map(function(_,i){return 8+i*(w-16)/(pts.length-1)}),yy=ys.map(function(y){return h-8-(y-lo)/rng*(h-16)});
+    var d='M'+xs.map(function(x,i){return x.toFixed(1)+' '+yy[i].toFixed(1)}).join(' L');
+    var dots=xs.map(function(x,i){return '<circle cx="'+x.toFixed(1)+'" cy="'+yy[i].toFixed(1)+'" r="3.5" fill="#1E8FA6"/>'}).join('');
+    return '<svg viewBox="0 0 '+w+' '+h+'" class="spark" role="img" aria-label="Google review count over time"><path d="'+d+'" fill="none" stroke="#1E8FA6" stroke-width="2.5" stroke-linejoin="round"/>'+dots+'</svg>'}
+  function ring(score){var r=56,c=2*3.14159*r,dash=c*Math.min(Math.max(score,0),100)/100;
+    return '<svg viewBox="0 0 132 132" role="img" aria-label="Pulse Score '+g_(score)+' out of 100"><circle cx="66" cy="66" r="'+r+'" fill="none" stroke="#EAF0F5" stroke-width="12"/><circle cx="66" cy="66" r="'+r+'" fill="none" stroke="#1E8FA6" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+dash.toFixed(1)+' '+c.toFixed(1)+'" transform="rotate(-90 66 66)"/><text x="66" y="74" text-anchor="middle" font-family="Bricolage Grotesque,system-ui,sans-serif" font-weight="800" font-size="34" fill="#0C2D56">'+g_(score)+'</text></svg>'}
+  function scorecard(name,where,g,pct_line,dine,take,src_line,tag,split){
+    var b=band(g)[0];g=Math.round(g);dine=dine!=null?Math.round(dine):null;take=take!=null?Math.round(take):null;
+    var dine_s=dine!=null?'<div><b>'+dine+'</b><span>Dine-in score</span></div>':'<div><b>–</b><span>Dine-in score</span></div>';
+    var take_s=take!=null?'<div><b>'+take+'</b><span>Take-out score</span></div>':'<div><b>–</b><span>Take-out: not enough data yet</span></div>';
+    return '<div class="scorecard" style="margin:0;max-width:none;box-shadow:var(--shadow)">'+(tag?'<span class="tag">'+tag+'</span>':'')
+      +'<p class="biz">'+esc(name)+'</p><p class="where">'+esc(where)+'</p>'
+      +'<div class="ring">'+ring(g)+'<div><div class="band">'+b+'</div><div class="rank" style="margin-top:0">Pulse Score '+g+' of 100</div>'+(pct_line?'<div class="rank">'+pct_line+'</div>':'')+'</div></div>'
+      +(split?'<div class="split">'+dine_s+take_s+'</div>':'')
+      +'<p class="src">'+src_line+'</p></div>'}
+  function section(inner,last){return '<section class="section tight"'+(last?' style="padding-bottom:64px"':'')+'><div class="wrap">'+inner+'</div></section>'}
+  function movesList(){return '<ul class="moves" style="margin-top:12px">'+MOVES.map(function(m){return '<li>'+ARROW+'<span><b>'+esc(m[0])+'</b> '+esc(m[1])+'</span></li>'}).join('')+'</ul>'}
+  var FINE='<p class="fine" style="margin:18px 0 0;max-width:none">You\'ll get an email when next month\'s reading is in. Sign out: <a href="#" id="signout">here</a>.</p>';
+  function head(bz,who,claim){
+    var trial='';
+    return '<section class="section tight" style="padding-bottom:0"><div class="wrap"><div class="owner-head">'
+      +'<div><p class="eyebrow">Your business</p><h1 style="font-size:clamp(1.8rem,3.4vw,2.6rem)">'+esc(bz.name)+'</h1><p class="who">'+who+'</p></div>'
+      +'<div><p class="hint" style="margin:0">Signed in as <b>'+esc(claim&&claim.email)+'</b>'+trial+'</p></div>'
+      +'</div></div></section>'}
+  function msg(eyebrow,title,body,btn){root.innerHTML=section('<div class="panel" style="max-width:640px">'+(eyebrow?'<p class="eyebrow">'+eyebrow+'</p>':'')+'<h3>'+title+'</h3><p>'+body+'</p>'+(btn||'')+'</div>',true)}
+
+  function scored(j){
+    var c=j.claim||{},bz=j.business||{},s=j.score,st=j.stats||{},ratio=st.ratio!=null?st.ratio:RATIO;
+    var tl=bz.type_label||'Other',city=bz.city||'';
+    var g=s.grade,b=band(g)[0],nb=next_band(g);
+    var srcs=(s.source_names||[]).slice();
+    var since=bz.tracked_since,since_txt=since?longD(since):null;
+    var who=esc(city)+' · '+esc(tl)+(since_txt?' · Tracked since '+esc(since_txt):'')+(bz.latest_reading?' · Latest reading '+esc(shortD(bz.latest_reading)):'');
+    var src_li=srcs.map(function(k){return '<li>'+esc(PLAT[k]||k)+'</li>'}).join('')
+      +['google','yelp','tripadvisor','opentable','doordash'].filter(function(k){return srcs.indexOf(k)<0}).map(function(k){return '<li class="off">'+PLAT[k]+' · not yet</li>'}).join('');
+    var dine=s.dine,take=s.take,gap_txt;
+    if(take!=null&&dine!=null){var gap=take-dine;
+      if(Math.abs(gap)>=15)gap_txt='Your take-out score is '+Math.round(Math.abs(gap))+' points '+(gap>0?'above':'below')+' your dine-in score. '+(gap>0?"The food travels well; the experience in the building is what's costing you.":'The room is winning and the doorstep is losing: look at packaging, pickup timing and what the delivery apps show for hours and menu.');
+      else gap_txt="Dine-in and take-out are within a few points of each other, which means the customers who sit down and the ones who order in are seeing the same business. That's the hard part done.";
+    }else gap_txt="There isn't enough delivery-platform history yet for a separate take-out score. If you're on DoorDash, it appears once the readings are steady.";
+    var next_txt=(nb?'Your next band, <b>'+band(nb)[0]+'</b>, starts at '+nb+'. ':"You're in the top band. ")+'Statewide, businesses at 90 or better have added Google reviews at about '+esc(ratio)+' times the rate of businesses under 40 since July.';
+    var gh=(j.history||[]).filter(function(r){return r&&r.obs_date&&r.review_count!=null}).map(function(r){return [String(r.obs_date).slice(0,10),parseInt(r.review_count,10)]}).sort(function(a,b){return a[0]<b[0]?-1:a[0]>b[0]?1:0});
+    var move_html;
+    if(gh.length>=2){
+      var d0=day(gh[0][0]),d1=day(gh[gh.length-1][0]),days=Math.max(Math.round((d1-d0)/864e5),1),added=gh[gh.length-1][1]-gh[0][1],per_mo=added/days*30.4;
+      var recent=gh.filter(function(x){return Math.round((d1-day(x[0]))/864e5)<=31});
+      var r_added=recent.length>=2?recent[recent.length-1][1]-recent[0][1]:null,last=gh[gh.length-1][1];
+      move_html='<div class="grid-2" style="align-items:center;gap:24px"><div>'+sparkline(gh)+'<p class="hint" style="margin:6px 0 0">Google review count, '+md(gh[0][0])+' to '+md(gh[gh.length-1][0])+' · '+gh.length+' readings</p></div>'
+        +'<div class="kv" style="grid-template-columns:1fr 1fr"><div><b>+'+fmt(added)+'</b><span>Google reviews since '+md(gh[0][0])+'</span></div><div><b>'+Math.round(per_mo)+'</b><span>a month, on average</span></div>'
+        +(r_added!=null?'<div><b>+'+fmt(r_added)+'</b><span>in the last 30 days</span></div>':'')
+        +'<div><b>'+fmt(last)+'</b><span>Google reviews today</span></div></div></div>'
+        +'<p style="margin:14px 0 0;max-width:none">'+(per_mo>=5?'Steady. ':'Slow. ')+(last>=1000?'Ratings move slowly once a business has thousands of reviews, so the count is the number to watch: every review added at your current rating pulls the score up a little and makes it harder to knock down.':'With fewer than a thousand reviews, each new one still moves the rating, so this is the stage where asking pays off fastest.')+'</p>';
+    }else move_html='<p class="hint">One reading so far. Movement appears after the next sweep.</p>';
+    var card=scorecard(bz.name,city+' · '+tl,g,'',dine,take,'Built from '+esc(srcs.map(function(k){return PLAT[k]||k}).join(', '))+' · '+fmt(s.reviews)+' reviews tracked',null,false);
+    var dr=dine!=null?Math.round(dine):'–',tr=take!=null?Math.round(take):'–';
+    var cp=s.city_pct,tp=s.type_pct,gained=s.gained_since_july;
+    var claimUrl='/claim?'+(bz.merchant_id!=null?'b='+encodeURIComponent(bz.merchant_id)+'&':'')+'n='+encodeURIComponent(bz.name||'')+'&c='+encodeURIComponent(city);
+    root.innerHTML=head(bz,who,c)+'<div id="pslot"></div>'+listingHtml(j)
+      +section('<div class="grid-2" style="align-items:start;gap:28px">'+card
+        +'<div class="panel"><h3>Where you stand</h3>'
+        +'<p class="hint" style="margin:0 0 6px">Among the '+fmt(s.city_n)+' businesses we track in '+esc(city)+'</p>'
+        +'<div class="bar"><i style="width:'+(cp||0)+'%"></i></div><p style="margin:0 0 16px">Higher than <b>'+(cp!=null?cp+'%':'–')+'</b></p>'
+        +'<p class="hint" style="margin:0 0 6px">Among '+fmt(s.type_n)+' '+esc(tl.toLowerCase())+' businesses statewide</p>'
+        +'<div class="bar"><i style="width:'+(tp||0)+'%"></i></div><p style="margin:0 0 18px">Higher than <b>'+(tp!=null?tp+'%':'–')+'</b></p>'
+        +'<div class="kv"><div><b>'+fmt(s.reviews)+'</b><span>reviews read across '+(s.sources||0)+' '+(s.sources==1?'source':'sources')+'</span></div>'
+        +'<div><b>'+(gained!=null?'+'+fmt(gained):'–')+'</b><span>Google reviews since '+(since_txt?esc(since_txt.split(',')[0]):'July')+'</span></div>'
+        +'<div><b>'+b+'</b><span>your band ('+(nb?'next starts at '+nb:'top band')+')</span></div></div></div></div>')
+      +section('<div class="grid-2" style="align-items:start;gap:28px">'
+        +'<div class="panel"><h3>Dine-in vs. take-out</h3><div class="split" style="margin-top:4px"><div><b>'+dr+'</b><span>Dine-in · Google, Yelp, TripAdvisor, OpenTable</span></div><div><b>'+tr+'</b><span>Take-out · DoorDash and delivery apps</span></div></div><p style="margin:14px 0 0">'+gap_txt+'</p></div>'
+        +'<div class="panel"><h3>Sources</h3><p class="hint" style="margin:0">Platforms feeding your score. We cite them; we don\'t republish their ratings.</p><ul class="srcs">'+src_li+'</ul>'
+        +'<p class="hint" style="margin:14px 0 0">Missing a platform you\'re on? <a href="'+esc(claimUrl)+'">Tell us</a> and we\'ll link it.</p></div></div>')
+      +section('<div class="panel"><h3>Movement</h3>'+move_html+'</div>')
+      +section('<div class="panel"><h3>What moving up would mean</h3><p style="max-width:none">'+next_txt+'</p>'+movesList()+FINE+'</div>',true);
+  }
+
+  function fresh(j){
+    var c=j.claim||{},bz=j.business||{},S=j.snapshot,city=bz.city||'',tl=bz.type_label||bz.category||'';
+    var who=esc(city)+(tl?' · '+esc(tl):'')+' · Tracked from your first review';
+    var h=head(bz,who,c)+'<div id="pslot"></div>'+listingHtml(j)
+      +section('<div class="panel"><h3>No score yet, and that\'s normal.</h3><p style="max-width:none;margin:0">Pulse reads the public ratings and review counts your customers leave on Google, Yelp, TripAdvisor, OpenTable and DoorDash. '+esc(bz.name)+' doesn\'t have any yet, so there\'s nothing to score. This page fills in from the first review, and we\'ll email you'+(c.email?' at <b>'+esc(c.email)+'</b>':'')+' when there\'s a first reading.</p></div>');
+    if(S&&S.top&&S.top.length&&S.n!=null){
+      var PL={'Restaurant':'restaurants','Bar':'bars','Coffee & Cafe':'coffee shops and cafes','Pizza':'pizza places','Brewery':'breweries','Quick Service':'quick-service spots','Bakery & Dessert':'bakeries and dessert shops'};
+      var cat=S.category||bz.category,pl=PL[cat]||'businesses like yours';
+      var state=S.level==='state',where_in=S.where_in||(state?'across Alaska':'in '+S.where),widened=S.level!=='town',town=S.town||city;
+      h+=section('<div class="panel snap"><p class="eyebrow">The room you\'re walking into</p>'
+        +'<h3>Pulse scores '+esc(fmt(S.n))+' '+esc(pl)+' '+esc(where_in)+'.</h3>'
+        +(widened?'<p class="hint" style="margin:0 0 10px">Not enough '+esc(pl)+' in '+esc(town)+' have reviews to score yet, so these numbers cover '+esc(state?'the whole state':S.where)+'.</p>':'')
+        +'<div class="kv" style="margin-top:12px"><div><b>'+esc(fmt(S.n))+'</b><span>Businesses scored</span></div><div><b>'+esc(S.median!=null?Math.round(S.median):'–')+'</b><span>Median Pulse Score</span></div>'
+        +(S.n_90!=null?'<div><b>'+esc(fmt(S.n_90))+'</b><span>Scoring 90 or better</span></div>':'')+'</div>'
+        +'<p style="margin:18px 0 6px;font-weight:700">The five to know '+esc(where_in)+'</p>'
+        +'<ol class="top5">'+S.top.slice(0,5).map(function(b){return '<li><span><b>'+esc(b.name)+'</b>'+(b.town?'<small>'+esc(b.town)+'</small>':'')+'</span><em>'+(b.score!=null?esc(Math.round(b.score))+' · ':'')+esc(fmt(b.reviews))+' reviews</em></li>'}).join('')+'</ol>'
+        +'<p class="hint" style="margin:6px 0 14px">Ranked by Pulse Score, as of the latest reading.</p>'
+        +(S.velocity_line?'<p style="margin:0 0 10px;max-width:none">'+esc(S.velocity_line)+'</p>':'')
+        +(S.soft_line?'<p style="margin:0;max-width:none">'+esc(S.soft_line)+'</p>':'')+'</div>');
+    }
+    h+=section('<div class="panel"><h3>What to do this month</h3>'+movesList()+FINE+'</div>',true);
+    root.innerHTML=h;
+  }
+
+  // ---- v0.5 listing: what the world sees (Places facts + classifier + platform listings) ----
+  var PLX={google:'Google',yelp:'Yelp',tripadvisor:'TripAdvisor',opentable:'OpenTable',doordash:'DoorDash',ubereats:'Uber Eats',grubhub:'Grubhub',facebook:'Facebook',instagram:'Instagram'};
+  function host(u){try{return new URL(/^https?:/i.test(u)?u:'https://'+u).hostname.replace(/^www\./,'')}catch(e){return String(u)}}
+  function tel(p){var d=String(p||'').replace(/[^\d]/g,'');if(d.length===10)d='1'+d;return d.length===11?'tel:+'+d:null}
+  var DELIV={doordash:1,ubereats:1,grubhub:1};
+  function hasDelivery(L){return !!(L&&(L.links||[]).some(function(l){return l&&DELIV[l.platform]}))}
+  var TPO=[['none','None'],['under_10','Under 10%'],['10_25','10–25%'],['25_50','25–50%'],['50_plus','Over half']];
+  var TPL={none:'none of your sales',under_10:'under 10% of your sales',"10_25":'10–25% of your sales',"25_50":'25–50% of your sales',"50_plus":'more than half of your sales'};
+  var TPC={under_10:'$75–$300',"10_25":'$150–$750',"25_50":'$375–$1,500',"50_plus":'$750–$2,250'};
+  function tpHtml(v,saving,err){
+    var head='<div class="panel" style="padding:16px 20px;margin-top:16px;background:#F4F7FA">';
+    if(v){
+      var line=v==='none'?'Thanks. We\'ll weigh your dine-in and take-out scores accordingly.':'Thanks. At the 15–30% commission the apps charge, '+TPL[v]+' running through them is roughly <b>'+TPC[v]+' of every $10,000 you ring up</b>. Worth knowing when you weigh a direct order against an app order.';
+      return head+'<p style="margin:0;max-width:none">'+line+' <a href="#" id="tpedit" class="hint">Change</a></p></div>';
+    }
+    return head+'<p style="margin:0 0 8px;font-weight:700">You\'re on the delivery apps. About what share of your sales comes through them?</p>'
+      +'<p class="hint" style="margin:0 0 10px">One tap. It sharpens your take-out score and tells us what the apps are worth to you.</p>'
+      +'<p style="margin:0">'+TPO.map(function(o){return '<button type="button" class="chip" data-k="tp" data-v="'+o[0]+'"'+(saving?' disabled':'')+'>'+o[1]+'</button>'}).join('')+'</p>'
+      +(err?'<p class="fine" style="margin:8px 0 0">Could not save just now. Try again in a moment.</p>':'')+'</div>';
+  }
+  function drawTp(){var slot=document.getElementById('tpslot');if(!slot)return;slot.innerHTML=tpHtml(PSTATE.tp,PSTATE.tpSaving,PSTATE.tpErr);}
+  function saveTp(v){
+    PSTATE.tpSaving=true;PSTATE.tpErr=false;drawTp();
+    fetch(API+'pulse-profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({t:t,third_party_share:v})}).then(function(r){return r.json()}).then(function(r){
+      if(!r||!r.ok)throw new Error('save');PSTATE.tp=(r.profile&&r.profile.third_party_share)||v;PSTATE.tpSaving=false;drawTp();
+    }).catch(function(){PSTATE.tpSaving=false;PSTATE.tpErr=true;drawTp();});
+  }
+  function listingHtml(j){
+    var L=j.listing,bz=j.business||{};
+    var mailto='mailto:hello@alyeskapulse.com?subject='+encodeURIComponent('Listing correction: '+(bz.name||'')+(bz.merchant_id!=null?' (#'+bz.merchant_id+')':''));
+    if(!L||(!L.address&&!L.phone&&!L.website&&!(L.hours&&L.hours.length)&&!(L.links&&L.links.length))){
+      return section('<div class="panel" style="padding:16px 24px"><p style="margin:0;max-width:none"><b>Your listing:</b> we\'re still gathering the details customers see for '+esc(bz.name||'your business')+' (hours, address, ordering links). They appear here once our first pass is done. <a href="'+mailto+'">Send us the basics</a> if you\'d like them in sooner.</p></div>');
+    }
+    var F=L.features||{};
+    var chips=[];
+    if(F.dine_in)chips.push('Dine-in');if(F.takeout)chips.push('Takeout');if(F.delivery)chips.push('Delivery');if(F.curbside)chips.push('Curbside');
+    if(F.reservable||F.reservations)chips.push('Reservations');if(F.online_ordering)chips.push('Online ordering');
+    if(L.alcohol==='full_bar')chips.push('Full bar');else if(L.alcohol==='beer_wine'||F.serves_beer||F.serves_wine)chips.push('Beer & wine');
+    if(F.breakfast)chips.push('Breakfast');if(F.brunch)chips.push('Brunch');if(F.lunch)chips.push('Lunch');if(F.dinner)chips.push('Dinner');
+    if(F.catering)chips.push('Catering');if(F.drive_thru)chips.push('Drive-thru');if(F.wheelchair)chips.push('Wheelchair accessible');
+    var price=L.price_level!=null&&L.price_level>0?'$$$$'.slice(0,Math.min(4,L.price_level)):null;
+    var rows=[];
+    if(L.address)rows.push('<div><span>Address</span><b>'+esc(L.address)+'</b></div>');
+    if(L.phone)rows.push('<div><span>Phone</span><b>'+(tel(L.phone)?'<a href="'+tel(L.phone)+'">'+esc(L.phone)+'</a>':esc(L.phone))+'</b></div>');
+    if(L.website)rows.push('<div><span>Website</span><b><a href="'+esc(/^https?:/i.test(L.website)?L.website:'https://'+L.website)+'" rel="noopener" target="_blank">'+esc(host(L.website))+'</a></b></div>');
+    if(price)rows.push('<div><span>Price level</span><b>'+price+'</b></div>');
+    if(L.business_status&&L.business_status!=='OPERATIONAL')rows.push('<div><span>Google status</span><b style="color:#B42318">'+esc(String(L.business_status).replace(/_/g,' ').toLowerCase())+'</b></div>');
+    var hours='';
+    if(L.hours&&L.hours.length){hours='<p class="hint" style="margin:14px 0 6px">Hours, as Google shows them</p><div class="hrs">'+L.hours.map(function(x){var m=/^([^:]+):\s*(.*)$/.exec(x);return m?'<div><span>'+esc(m[1])+'</span><b>'+esc(m[2])+'</b></div>':'<div><b>'+esc(x)+'</b></div>'}).join('')+'</div>'}
+    var links=(L.links||[]).filter(function(l){return l&&l.url}).map(function(l){return '<a class="chip" style="cursor:pointer;text-decoration:none" href="'+esc(l.url)+'" rel="noopener" target="_blank">'+esc(PLX[l.platform]||PLAT[l.platform]||l.platform)+'</a>'}).join('');
+    var issues=(L.issues||[]).length?'<div class="panel" style="background:#FFF8E6;border-color:#F3D48A;padding:14px 18px;margin-top:16px"><p style="margin:0 0 6px;font-weight:700">Worth a look</p><ul style="margin:0;padding-left:18px">'+L.issues.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul><p class="hint" style="margin:8px 0 0">Things a customer hits before they walk in. Each is usually a ten-minute fix.</p></div>':'';
+    var checked=L.checked_at?' Checked '+esc(shortD(L.checked_at))+'.':'';
+    return section('<div class="grid-2" style="align-items:start;gap:28px">'
+      +'<div class="panel"><h3>Your listing</h3><p class="hint" style="margin:0 0 10px">What the world sees for '+esc(bz.name||'your business')+', pulled from your Google listing and website.</p>'
+      +(rows.length?'<div class="lst">'+rows.join('')+'</div>':'')+hours+'</div>'
+      +'<div class="panel"><h3>What customers see</h3>'
+      +(chips.length?'<p style="margin:0 0 6px">'+chips.map(function(c){return '<span class="chip on" style="cursor:default">'+esc(c)+'</span>'}).join('')+'</p>':'<p class="hint" style="margin:0 0 6px">No service details listed yet.</p>')
+      +(links?'<p class="hint" style="margin:12px 0 6px">Found on</p><p style="margin:0">'+links+'</p>':'')
+      +(hasDelivery(L)?'<div id="tpslot"></div>':'')
+      +issues
+      +'<p class="hint" style="margin:14px 0 0">'+checked.trim()+' Something wrong or out of date? <a href="'+mailto+'">Tell us</a> and we\'ll fix it within a day.</p></div></div>');
+  }
+  // ---- v0.4 owner questions (service model, cuisine, planned opening) ----
+  var SM=[['table_service','Table service'],['counter','Counter'],['bar','Bar'],['cafe','Café'],['food_truck','Food truck'],['retail','Retail'],['lodging','Lodging'],['other','Other']];
+  var PO=[['open','Already open'],['within_1m','Within a month'],['1_3m','1–3 months'],['3_6m','3–6 months'],['6m_plus','6+ months']];
+  var CU=['American','Pizza','Burgers','Sandwiches','Mexican','Sushi','Japanese','Chinese','Thai','Vietnamese','Korean','Filipino','Hawaiian','Indian','Italian','Mediterranean','Seafood','Steak','BBQ','Breakfast','Coffee','Baked goods','Ice cream & dessert','Beer & spirits','Bar food'];
+  function lbl(list,v){for(var i=0;i<list.length;i++)if(list[i][0]===v)return list[i][1];return null}
+  var PSTATE={sm:null,cu:[],po:null,tp:null,tpSaving:false,tpErr:false,askPo:false,name:''};
+  function chipRow(list,sel,key){return list.map(function(x){var v=Array.isArray(x)?x[0]:x,t=Array.isArray(x)?x[1]:x;var on=Array.isArray(sel)?sel.indexOf(v)>=0:sel===v;return '<button type="button" class="chip'+(on?' on':'')+'" data-k="'+key+'" data-v="'+esc(v)+'">'+esc(t)+'</button>'}).join('')}
+  function cardHtml(edit){
+    var st=PSTATE;
+    if(!edit){
+      var bits=[];if(st.sm)bits.push(lbl(SM,st.sm));if(st.cu.length)bits.push(st.cu.join(', '));if(st.po)bits.push(st.po==='open'?'Open':'Opening: '+lbl(PO,st.po));
+      return section('<div class="panel" style="padding:16px 24px"><p style="margin:0;max-width:none"><b>About '+esc(st.name||'your business')+':</b> '+esc(bits.join(' · ')||'not filled in yet')+' &nbsp;<a href="#" id="pedit">Change</a></p></div>');
+    }
+    return section('<div class="panel" id="pcard"><p class="eyebrow">Two quick questions</p><h3 style="margin-top:4px">Help us compare you with the right room.</h3>'
+      +'<p class="hint" style="margin:0 0 8px">What kind of place is it?</p><p style="margin:0 0 14px">'+chipRow(SM,st.sm,'sm')+'</p>'
+      +'<p class="hint" style="margin:0 0 8px">What do you serve? Pick up to three.</p><p style="margin:0 0 6px">'+chipRow(CU,st.cu,'cu')+'</p>'
+      +'<p style="margin:0 0 14px"><input id="cuother" placeholder="Something else" maxlength="40" style="padding:9px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;width:220px;max-width:100%"> <button type="button" class="chip" id="cuadd">Add</button></p>'
+      +(st.askPo?'<p class="hint" style="margin:0 0 8px">When do you plan to open?</p><p style="margin:0 0 14px">'+chipRow(PO,st.po,'po')+'</p>':'')
+      +'<p style="margin:6px 0 0"><button type="button" class="btn btn-primary" id="psave">Save</button> <button type="button" class="btn btn-ghost" id="pskip">Not now</button></p>'
+      +'<p class="fine" id="perr" style="display:none;margin:10px 0 0">Could not save just now. Try again in a moment.</p></div>');
+  }
+  function drawCard(edit){var slot=document.getElementById('pslot');if(!slot)return;slot.innerHTML=cardHtml(edit);}
+  function applyProfile(pr){pr=pr||{};PSTATE.sm=pr.service_model||null;PSTATE.cu=Array.isArray(pr.cuisine)?pr.cuisine.slice(0,3):[];PSTATE.po=pr.planned_open||null;PSTATE.tp=pr.third_party_share||null;}
+  function loadProfile(j){
+    PSTATE.name=(j.business&&j.business.name)||'';PSTATE.askPo=!(j.score&&j.score.grade!=null);
+    var hid=false;try{hid=localStorage.getItem('pulse_pcard_skip')==='1'}catch(e){}
+    fetch(API+'pulse-profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({t:t})}).then(function(r){return r.json()}).then(function(r){
+      if(!r||!r.ok){return;}
+      applyProfile(r.profile);
+      var complete=!!(PSTATE.sm&&PSTATE.cu.length&&(!PSTATE.askPo||PSTATE.po));
+      drawCard(!complete&&!hid);drawTp();
+    }).catch(function(){});
+  }
+  function saveProfile(){
+    var body={t:t};if(PSTATE.sm)body.service_model=PSTATE.sm;if(PSTATE.cu.length)body.cuisine=PSTATE.cu;if(PSTATE.po)body.planned_open=PSTATE.po;
+    var btn=document.getElementById('psave');if(btn){btn.disabled=true;btn.textContent='Saving…';}
+    fetch(API+'pulse-profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json()}).then(function(r){
+      if(!r||!r.ok)throw new Error('save');applyProfile(r.profile);try{localStorage.removeItem('pulse_pcard_skip')}catch(e){}drawCard(false);
+    }).catch(function(){var e=document.getElementById('perr');if(e)e.style.display='block';if(btn){btn.disabled=false;btn.textContent='Save';}});
+  }
+  document.addEventListener('click',function(e){
+    var c=e.target.closest&&e.target.closest('button.chip[data-k]');
+    if(c){var k=c.getAttribute('data-k'),v=c.getAttribute('data-v');
+      if(k==='tp'){saveTp(v);return;}
+      if(k==='sm')PSTATE.sm=PSTATE.sm===v?null:v;
+      else if(k==='po')PSTATE.po=PSTATE.po===v?null:v;
+      else if(k==='cu'){var i=PSTATE.cu.indexOf(v);if(i>=0)PSTATE.cu.splice(i,1);else if(PSTATE.cu.length<3)PSTATE.cu.push(v);}
+      drawCard(true);return;}
+    if(e.target.id==='cuadd'){var inp=document.getElementById('cuother'),v2=(inp&&inp.value||'').replace(/[^A-Za-z0-9 &'\-\/]/g,'').trim().slice(0,40);if(v2&&PSTATE.cu.indexOf(v2)<0&&PSTATE.cu.length<3)PSTATE.cu.push(v2);drawCard(true);return;}
+    if(e.target.id==='psave'){saveProfile();return;}
+    if(e.target.id==='pskip'){try{localStorage.setItem('pulse_pcard_skip','1')}catch(x){}drawCard(false);return;}
+    if(e.target.id==='pedit'){e.preventDefault();drawCard(true);return;}
+    if(e.target.id==='tpedit'){e.preventDefault();PSTATE.tp=null;drawTp();return;}
+  });
+  document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('#signout');if(!a)return;e.preventDefault();lsDel();location.href='/'});
+
+  var q=new URLSearchParams(location.search),t=q.get('t');
+  if(t){lsSet(t);try{history.replaceState(null,'',location.pathname+location.hash)}catch(e){}}
+  else t=lsGet();
+  if(!t){location.replace('/signin');return}
+
+  function load(){
+    msg('','Loading your page…','One moment while we pull your latest reading.');
+    fetch(API+'pulse-me?t='+encodeURIComponent(t)).then(function(r){return r.json()}).then(function(j){
+      if(!j||!j.ok||!j.business){
+        lsDel();
+        var exp=j&&j.error==='expired';
+        msg('Sign in again',exp?'That sign-in link has expired.':"We don't recognize that sign-in link.",
+          (exp?'Links are good for 30 days on the device you open them on. ':'It may have been copied incompletely, or it belongs to an older sign-in. ')+'Ask for a new one and it\'ll be in your inbox in a minute.',
+          '<a class="btn btn-primary" href="/signin">Email me a new link</a>');
+        return;
+      }
+      document.title=(j.business.name||'Your business')+' · Pulse';
+      if(j.score&&j.score.grade!=null)scored(j);else fresh(j);
+      loadProfile(j);
+    }).catch(function(){
+      msg('Not loaded',"We couldn't reach Pulse just now.",'Check your connection and try again. You\'re still signed in.','<button class="btn btn-primary" type="button" id="again">Try again</button>');
+      var b=document.getElementById('again');if(b)b.addEventListener('click',load);
+    });
+  }
+  load();
+})();
+</script>
+<footer><div class="wrap">
+  <div>© 2026 Pulse · The Alaska Merchant Pulse · Anchorage, Alaska</div>
+  <nav><a href="/how-it-works">How it works</a><a href="/lookup">Find your business</a><a href="/signin">Sign in</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
+</div></footer>
+</body>
+</html>

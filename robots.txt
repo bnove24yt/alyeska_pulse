@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /me
+Disallow: /b/preview/
+Disallow: /unsubscribe
+Disallow: /signin
+Sitemap: https://alyeskapulse.com/sitemap.xml

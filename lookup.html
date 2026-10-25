@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Find your business · Pulse</title>
+<meta name="description" content="Search the Alaska Merchant Pulse for your restaurant, bar, coffee stand or shop and claim it to see its score.">
+<link rel="canonical" href="https://alyeskapulse.com/lookup">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="/assets/pulse.css">
+<meta property="og:title" content="Find your business · Pulse">
+<meta property="og:description" content="Search the Alaska Merchant Pulse for your restaurant, bar, coffee stand or shop and claim it to see its score.">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><svg viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#0C2D56"/><path d="M5 19h6l3-8 5 14 4-10 2 4h4" fill="none" stroke="#3FD3E6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Pulse</b><small>The Alaska Merchant Pulse</small></span></a>
+  <nav class="nav" aria-label="Main"><a href="/how-it-works">How it works</a><a href="/lookup">Find your business</a><a href="/signin">Sign in</a><a class="btn btn-primary" href="/lookup">Claim your business</a></nav>
+</div></header>
+
+<section class="section">
+  <div class="wrap narrow">
+    <p class="eyebrow">Find your business</p>
+    <h1>Is your business on the Pulse?</h1>
+    <p class="lede">If it holds an Alaska business license and takes reviews, it should be. Search by name, then claim it to see its score. Scores are never shown here.</p>
+    <figure class="photo wide" style="margin:22px 0 6px"><img src="/assets/img/coffee-hut.webp" alt="A drive-through espresso stand on a cold Alaska morning" width="1024" height="688" loading="lazy"></figure>
+    <div class="search" style="margin-top:22px">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <label class="sr-only" for="q">Business name</label>
+      <input id="q" type="search" placeholder="Start typing a business name…" autocomplete="off" autofocus>
+    </div>
+    <div class="results" id="results" aria-live="polite"><p class="empty">Type at least three letters of the business name. Add the town if the name is common, like "Moose Wasilla".</p></div>
+    <p class="hint" style="margin-top:22px">Not here? Businesses appear once we have at least one platform reading for them, and new licenses take a month to show up. <a href="/claim?missing=1">Tell us about a missing business</a> and we'll add it.</p>
+  </div>
+</section>
+<script>
+(function(){
+  var q=document.getElementById('q'), out=document.getElementById('results'), data=null, t;
+  function esc(s){return s.replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function month(f){var d=new Date(f+'-15T12:00:00');return d.toLocaleDateString('en-US',{month:'short',year:'numeric'})}
+  function render(list,term){
+    if(term.length<3){out.innerHTML='<p class="empty">Type at least three letters of the business name. Add the town if the name is common, like "Moose Wasilla".</p>';return}
+    if(!list.length){out.innerHTML='<p class="empty">Nothing matches "'+esc(term)+'". Try fewer words, or <a href="/claim?missing=1">tell us it\'s missing</a>.</p>';return}
+    out.innerHTML=list.slice(0,10).map(function(b){
+      return '<div class="result"><div><b>'+esc(b.n)+'</b><div class="meta"><span>'+esc(b.c)+'</span><span>'+esc(b.t)+'</span><span>Tracked since '+month(b.f)+'</span><span>'+b.s+(b.s==1?' source':' sources')+'</span></div></div><a class="btn btn-primary" href="/claim?b='+b.id+'&n='+encodeURIComponent(b.n)+'&c='+encodeURIComponent(b.c)+'">This is my business</a></div>';
+    }).join('')+(list.length>10?'<p class="empty">'+list.length+' matches; showing 10. Add the town to narrow it.</p>':'');
+  }
+  function norm(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim()}
+  function search(){
+    var term=norm(q.value); if(term.length<3){render([],term);return}
+    var words=term.split(' ');
+    var hits=data.filter(function(b){var hay=norm(b.n+' '+b.c);return words.every(function(w){return hay.indexOf(w)>-1})});
+    hits.sort(function(a,b){var an=norm(a.n).indexOf(words[0])===0?0:1,bn=norm(b.n).indexOf(words[0])===0?0:1;return an-bn||b.s-a.s});
+    render(hits,term);
+  }
+  q.addEventListener('input',function(){clearTimeout(t);t=setTimeout(function(){
+    if(data){search();return}
+    fetch('/assets/index.json').then(function(r){return r.json()}).then(function(j){data=j;search()});
+  },120)});
+})();
+</script>
+<footer><div class="wrap">
+  <div>© 2026 Pulse · The Alaska Merchant Pulse · Anchorage, Alaska</div>
+  <nav><a href="/how-it-works">How it works</a><a href="/lookup">Find your business</a><a href="/signin">Sign in</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
+</div></footer>
+</body>
+</html>

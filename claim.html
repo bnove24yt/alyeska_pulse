@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Claim your business · Pulse</title>
+<meta name="description" content="Claim your Alaska business on the Pulse to see its score. A verified email, no password.">
+<link rel="canonical" href="https://alyeskapulse.com/claim">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="/assets/pulse.css">
+<meta property="og:title" content="Claim your business · Pulse">
+<meta property="og:description" content="Claim your Alaska business on the Pulse to see its score. A verified email, no password.">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><svg viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#0C2D56"/><path d="M5 19h6l3-8 5 14 4-10 2 4h4" fill="none" stroke="#3FD3E6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Pulse</b><small>The Alaska Merchant Pulse</small></span></a>
+  <nav class="nav" aria-label="Main"><a href="/how-it-works">How it works</a><a href="/lookup">Find your business</a><a href="/signin">Sign in</a><a class="btn btn-primary" href="/lookup">Claim your business</a></nav>
+</div></header>
+
+<section class="section">
+  <div class="wrap narrow">
+    <p class="eyebrow">Claim your business</p>
+    <h1 id="h">Claim <span id="bn">your business</span></h1>
+    <p class="who" id="lic-meta" style="display:none;margin:-4px 0 12px;color:var(--muted)"></p>
+    <p class="lede" id="sub">One check and you're in: we email you a sign-in link. No password to remember.</p>
+    <div id="snap" class="panel snap" style="margin-top:22px;display:none"></div>
+    <p class="notice" id="offer" style="margin-top:22px;max-width:none"><b>Free.</b> Claiming shows you your current score and subscribes you to your Pulse report, a monthly email with your score, what moved and what it means. The report, movement panel, platform-by-platform breakdown and review routing are all free right now; if that ever changes, we'll tell you first.</p>
+    <form id="f" class="panel" style="margin-top:22px" novalidate>
+      <input type="hidden" name="business_id" id="bid">
+      <input type="hidden" name="lic" id="lic">
+      <input type="hidden" name="cat" id="cat">
+      <div class="field"><label for="bname">Business</label><input id="bname" name="business_name" type="text" readonly required></div>
+      <div class="grid-2">
+        <div class="field"><label for="name">Your name</label><input id="name" name="name" type="text" autocomplete="name" required></div>
+        <div class="field"><label for="role">Your role</label><select id="role" name="role"><option>Owner</option><option>General manager</option><option>Manager</option><option>Marketing</option><option>Other</option></select></div>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label for="email">Work email</label><input id="email" name="email" type="email" autocomplete="email" required><p class="hint">Your sign-in link goes here. An address at your business's own domain carries the most weight.</p></div>
+        <div class="field"><label for="phone">Phone</label><input id="phone" name="phone" type="tel" autocomplete="tel" required><p class="hint">So we can reach you about your listing.</p></div>
+      </div>
+      <div class="field"><label style="display:flex;gap:10px;align-items:flex-start;font-weight:400"><input type="checkbox" name="authorized" required style="width:auto;margin-top:5px"><span>I own this business or am authorized to act for it. The score and data shown to me are for this business's own use and won't be republished.</span></label></div>
+      <div class="field"><label style="display:flex;gap:10px;align-items:flex-start;font-weight:400"><input type="checkbox" name="terms" required style="width:auto;margin-top:5px"><span>I have read and accept the Pulse <a href="/terms" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span></label></div>
+      <div class="field"><label style="display:flex;gap:10px;align-items:flex-start;font-weight:400"><input type="checkbox" name="esign" required style="width:auto;margin-top:5px"><span>I agree to receive my Pulse report, sign-in links and notices about my account electronically, at the email address above. I can withdraw this consent or unsubscribe at any time by replying to any Pulse email.</span></label></div>
+      <p class="fine">By claiming, you subscribe to your monthly Pulse report and occasional notes about changes to Pulse. We don't sell or share your contact details, and claiming never puts you on a sales list for anything else. We record the date, time and network address of your acceptance.</p>
+      <button class="btn btn-primary btn-block" type="submit" id="go">Email me my sign-in link</button>
+    </form>
+    <div id="o-err" class="panel" style="margin-top:22px;display:none" role="alert">
+      <p class="eyebrow">Not sent</p>
+      <h3>Your claim didn't go through.</h3>
+      <p id="err-msg">We couldn't reach Pulse just now. Check your connection and try again; nothing you typed has been lost.</p>
+      <button class="btn btn-primary" type="button" id="retry">Try again</button>
+    </div>
+    <div id="o-ok" class="panel" style="margin-top:22px;display:none">
+      <p class="eyebrow">Check your email</p>
+      <h3>You're in. Your sign-in link is on its way.</h3>
+      <p>We emailed <b class="em3"></b> a link to your business page. It's good for 30 days on the device you open it on; after that, <a href="/signin">ask for a new one</a> any time. <span id="ok-lic" style="display:none">There's no score to show until your first reviews come in; your page starts tracking from the first one. </span>You'll also get an email each month when the new reading is in. Your score is free to see, always; the monthly report is free for your first 90 days.</p>
+      <p class="fine">Nothing in a few minutes? Check your spam folder, then <a href="/signin">ask for a new link</a>.</p>
+    </div>
+    <div id="o-taken" class="panel" style="margin-top:22px;display:none">
+      <p class="eyebrow">Already claimed</p>
+      <h3>Someone has already claimed this business.</h3>
+      <p>If that's you or a colleague, <a href="/signin">sign in</a> with the email that was used. If it isn't, tell us: your claim is on file with the email and phone you gave, and a claim from the business's own domain or listed phone outranks one that isn't. We'll sort it out and email you.</p>
+      <a class="btn btn-ghost" id="dispute" href="mailto:hello@alyeskapulse.com?subject=Pulse%20claim">This shouldn't be claimed by anyone else</a>
+    </div>
+    <div id="missing" class="panel" style="margin-top:22px;display:none">
+      <h3>Tell us about a business we're missing</h3>
+      <p>Give us the name and town and we'll check the license records and add it. You'll get an email when it's live and can claim it then.</p>
+      <div id="m-form">
+        <div class="field"><label for="mn">Business name</label><input id="mn" type="text" required></div>
+        <div class="field"><label for="mc">Town</label><input id="mc" type="text" required></div>
+        <div class="field"><label for="me">Your email</label><input id="me" type="email" autocomplete="email" required></div>
+        <p class="hint" id="m-err" role="alert" style="display:none;color:var(--warn)"></p>
+        <button class="btn btn-primary" type="button" id="m-go">Send</button>
+      </div>
+      <p id="m-ok" style="display:none;margin:0"><b>Thanks, we'll email you when it's live.</b></p>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  var API='https://cl8.alyeskapos.com/webhook/';
+  function post(path,payload){return fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json().catch(function(){return {ok:false,error:r.ok?'bad_response':'http_'+r.status}})})}
+  function $(id){return document.getElementById(id)}
+  var p=new URLSearchParams(location.search);
+  if(p.get('missing')){
+    $('f').style.display='none';$('sub').style.display='none';$('offer').style.display='none';$('h').textContent='Add a missing business';$('missing').style.display='block';
+    var mgo=$('m-go'),merr=$('m-err');
+    mgo.addEventListener('click',function(){
+      var mn=$('mn'),mc=$('mc'),me=$('me');
+      if(!mn.value.trim()){mn.reportValidity();return}if(!mc.value.trim()){mc.reportValidity();return}if(!me.value.trim()||!me.checkValidity()){me.reportValidity();return}
+      mgo.disabled=true;mgo.textContent='Sending…';merr.style.display='none';
+      post('pulse-missing',{name:mn.value.trim(),town:mc.value.trim(),email:me.value.trim()}).then(function(j){
+        if(j&&j.ok){$('m-form').style.display='none';$('m-ok').style.display='block';return}
+        merr.textContent="That didn't go through on our end. Please try again in a minute.";merr.style.display='block';
+      },function(){merr.textContent="We couldn't reach Pulse. Check your connection and try again.";merr.style.display='block'}).then(function(){mgo.disabled=false;mgo.textContent='Send'});
+    });
+    return;
+  }
+  var n=(p.get('n')||'').trim(),c=(p.get('c')||'').trim(),lic=(p.get('lic')||'').trim().slice(0,40);
+  var CATS=['Restaurant','Bar','Coffee & Cafe','Pizza','Brewery','Quick Service','Bakery & Dessert'];
+  var cat=CATS.indexOf(p.get('cat'))>-1?p.get('cat'):'Restaurant';
+  if(n){$('bn').textContent=n;$('bname').value=n+(c?' · '+c:'');$('bid').value=p.get('b')||''}
+  else{$('bname').value='';$('bname').readOnly=false;$('bname').placeholder='Business name and town'}
+  if(lic){
+    $('lic').value=lic;$('cat').value=cat;
+    var meta=$('lic-meta');meta.textContent=(c?c+' · ':'')+cat+' · Alaska business license '+lic;meta.style.display='block';
+    $('sub').textContent="We found your Alaska business license. You don't have reviews yet, so there's no score to show; claim now and you're tracked from your first review.";
+    $('ok-lic').style.display='inline';
+    if(c){try{snapshot(c,cat)}catch(e){}}
+  }
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]})}
+  function snapshot(town,cat){
+    var PL={'Restaurant':'restaurants','Bar':'bars','Coffee & Cafe':'coffee shops and cafes','Pizza':'pizza places','Brewery':'breweries','Quick Service':'quick-service spots','Bakery & Dessert':'bakeries and dessert shops'};
+    fetch('/assets/snapshots.json').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
+      var t=town.toLowerCase(),key=null,k;
+      for(k in j){if(k.charAt(0)!=='_'&&k.toLowerCase()===t+'|'+cat.toLowerCase()){key=k;break}}
+      var reg=j._regions&&j._regions[t];
+      if(!key&&reg&&j[reg+'|'+cat])key=reg+'|'+cat;
+      if(!key&&j['Statewide|'+cat])key='Statewide|'+cat;
+      var S=key&&j[key];if(!S||!S.top5||!S.top5.length||S.count==null)return;
+      var state=S.level==='state',where_in=state?'across Alaska':'in '+S.where,widened=S.level!=='town';
+      var h='<p class="eyebrow">The room you\'re walking into</p>'
+        +'<h3>Pulse scores '+esc(Number(S.count).toLocaleString('en-US'))+' '+esc(PL[cat])+' '+esc(where_in)+'.</h3>'
+        +(widened?'<p class="hint" style="margin:0 0 10px">Not enough '+esc(PL[cat])+' in '+esc(town)+' have reviews to score yet, so these numbers cover '+esc(state?'the whole state':S.where)+'.</p>':'')
+        +'<div class="kv" style="grid-template-columns:1fr 1fr;margin-top:12px"><div><b>'+esc(S.count)+'</b><span>Businesses scored</span></div><div><b>'+esc(S.median)+'</b><span>Median Pulse Score</span></div></div>'
+        +'<p style="margin:18px 0 6px;font-weight:700">The five to know '+esc(where_in)+'</p>'
+        +'<ol class="top5">'+S.top5.map(function(b){return '<li><span><b>'+esc(b.name)+'</b>'+(b.town?'<small>'+esc(b.town)+'</small>':'')+'</span><em>'+(b.score!=null?esc(b.score)+' · ':'')+esc(Number(b.reviews||0).toLocaleString('en-US'))+' reviews</em></li>'}).join('')+'</ol>'
+        +'<p class="hint" style="margin:6px 0 14px">Ranked by Pulse Score. We only name businesses at the top; every score stays private to its own business.</p>'
+        +(S.velocity?'<p style="margin:0 0 10px;max-width:none">'+esc(S.velocity)+'</p>':'')
+        +(S.soft?'<p style="margin:0;max-width:none">'+esc(S.soft)+'</p>':'');
+      var el=$('snap');el.innerHTML=h;el.style.display='block';
+    }).catch(function(){});
+  }
+  var f=$('f'),go=$('go'),LABEL=go.textContent,busy=false;
+  function show(id){['o-ok','o-taken','o-err'].forEach(function(k){$(k).style.display=k===id?'block':'none'})}
+  function done(o){
+    Array.prototype.forEach.call(document.querySelectorAll('.em3'),function(e){e.textContent=f.email.value.trim()});
+    f.style.display='none';$('snap').style.display='none';$('offer').style.display='none';show(o);window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function fail(msg){$('err-msg').textContent=msg;show('o-err');$('o-err').scrollIntoView({behavior:'smooth',block:'center'})}
+  f.addEventListener('submit',function(e){e.preventDefault();if(busy)return;if(!f.checkValidity()){f.reportValidity();return}
+    busy=true;go.disabled=true;go.textContent='Sending…';$('retry').disabled=true;show(null);
+    var payload={b:$('bid').value||'',lic:$('lic').value||'',n:n||$('bname').value.trim(),c:c,cat:$('lic').value?$('cat').value:'',
+      name:f.name.value.trim(),role:f.role.value,email:f.email.value.trim(),phone:f.phone.value.trim(),source:'site',terms:'2026-09-19',esign:!!f.esign.checked};
+    post('pulse-claim',payload).then(function(j){
+      if(j&&j.ok&&j.outcome==='sent'){done('o-ok');return}
+      if(j&&j.ok&&j.outcome==='taken'){done('o-taken');return}
+      fail("Something went wrong on our end and your claim wasn't recorded. Please try again in a minute; nothing you typed has been lost.");
+    },function(){fail("We couldn't reach Pulse just now. Check your connection and try again; nothing you typed has been lost.")}).then(function(){busy=false;go.disabled=false;go.textContent=LABEL;$('retry').disabled=false});
+  });
+  $('retry').addEventListener('click',function(){if(f.requestSubmit)f.requestSubmit(go);else f.dispatchEvent(new Event('submit',{cancelable:true}))});
+})();
+</script>
+<footer><div class="wrap">
+  <div>© 2026 Pulse · The Alaska Merchant Pulse · Anchorage, Alaska</div>
+  <nav><a href="/how-it-works">How it works</a><a href="/lookup">Find your business</a><a href="/signin">Sign in</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
+</div></footer>
+</body>
+</html>

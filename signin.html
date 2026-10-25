@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign in · Pulse</title>
+<meta name="description" content="Sign in to Pulse with a link sent to your email. No password.">
+<link rel="canonical" href="https://alyeskapulse.com/signin">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="/assets/pulse.css">
+<meta property="og:title" content="Sign in · Pulse">
+<meta property="og:description" content="Sign in to Pulse with a link sent to your email. No password.">
+<meta name="robots" content="noindex,nofollow">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><svg viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#0C2D56"/><path d="M5 19h6l3-8 5 14 4-10 2 4h4" fill="none" stroke="#3FD3E6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Pulse</b><small>The Alaska Merchant Pulse</small></span></a>
+  <nav class="nav" aria-label="Main"><a href="/how-it-works">How it works</a><a href="/lookup">Find your business</a><a href="/signin">Sign in</a><a class="btn btn-primary" href="/lookup">Claim your business</a></nav>
+</div></header>
+
+<section class="section">
+  <div class="wrap narrow" style="max-width:560px">
+    <p class="eyebrow">Sign in</p>
+    <h1>We'll email you a link.</h1>
+    <p class="lede">Enter the email you claimed your business with. The link signs you in for 30 days on this device; there's no password to remember or reset.</p>
+    <form id="f" class="panel" style="margin-top:22px" novalidate>
+      <div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email" required></div>
+      <p class="hint" id="err" role="alert" style="display:none;color:var(--warn)"></p>
+      <button class="btn btn-primary btn-block" type="submit" id="go">Send my sign-in link</button>
+      <p class="fine" style="margin:14px 0 0">Haven't claimed your business yet? <a href="/lookup">Find it here.</a></p>
+    </form>
+    <div id="done" class="panel" style="margin-top:22px;display:none">
+      <h3>Check your email.</h3>
+      <p>If <b id="em2"></b> has claimed a business on Pulse, a sign-in link is on its way. It's good for 30 days on this device. Nothing arrives? Check spam, or <a href="/signin">try again</a>.</p>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  var API='https://cl8.alyeskapos.com/webhook/';
+  function post(path,payload){return fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json().catch(function(){return {ok:false,error:r.ok?'bad_response':'http_'+r.status}})})}
+  var f=document.getElementById('f'),go=document.getElementById('go'),err=document.getElementById('err'),LABEL=go.textContent,busy=false;
+  f.addEventListener('submit',function(e){e.preventDefault();if(busy)return;if(!f.checkValidity()){f.reportValidity();return}
+    var em=f.email.value.trim();busy=true;go.disabled=true;go.textContent='Sending…';err.style.display='none';
+    post('pulse-signin',{email:em}).then(function(j){
+      if(j&&j.ok){document.getElementById('em2').textContent=em;f.style.display='none';document.getElementById('done').style.display='block';return}
+      err.textContent="That didn't go through on our end. Please try again in a minute.";err.style.display='block';
+    },function(){err.textContent="We couldn't reach Pulse. Check your connection and try again.";err.style.display='block'}).then(function(){busy=false;go.disabled=false;go.textContent=LABEL});
+  });
+})();
+</script>
+<footer><div class="wrap">
+  <div>© 2026 Pulse · The Alaska Merchant Pulse · Anchorage, Alaska</div>
+  <nav><a href="/how-it-works">How it works</a><a href="/lookup">Find your business</a><a href="/signin">Sign in</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
+</div></footer>
+</body>
+</html>
