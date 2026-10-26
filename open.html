@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>When do you open? · Pulse</title>
+<meta name="description" content="One tap tells Pulse when to start watching for your first reviews.">
+<link rel="canonical" href="https://alyeskapulse.com/open">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="/assets/pulse.css">
+<meta property="og:title" content="When do you open? · Pulse">
+<meta property="og:description" content="One tap tells Pulse when to start watching for your first reviews.">
+<meta name="robots" content="noindex,nofollow">
+<style>.chip{display:inline-block;padding:9px 16px;border:1px solid var(--line);border-radius:999px;margin:0 8px 10px 0;cursor:pointer;background:#fff;font-weight:600;color:var(--ink);font-family:inherit;font-size:.95rem}.chip.on{border-color:#1E8FA6;background:#E6F6F9;color:#146F82}.chip:disabled{opacity:.6;cursor:default}</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/"><svg viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="#0C2D56"/><path d="M5 19h6l3-8 5 14 4-10 2 4h4" fill="none" stroke="#3FD3E6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Pulse</b><small>The Alaska Merchant Pulse</small></span></a>
+  <nav class="nav" aria-label="Main"><a href="/how-it-works">How it works</a><a href="/lookup">Find your business</a><a href="/signin">Sign in</a><a class="btn btn-primary" href="/lookup">Claim your business</a></nav>
+</div></header>
+
+<section class="section">
+  <div class="wrap narrow" style="max-width:600px">
+    <p class="eyebrow">Quick question</p>
+    <h1 id="h">When do you plan to open?</h1>
+    <p class="lede" id="msg">Tap one. It tells us when to start watching for your first reviews, and not to write before then.</p>
+    <p id="chips" style="margin:6px 0 14px"></p>
+    <p class="fine" id="note" style="display:none"></p>
+    <p id="cta" style="display:none;margin-top:18px"><a class="btn btn-primary" id="claimlink" href="/claim">Claim your listing &mdash; it&#39;s free</a></p>
+  </div>
+</section>
+<script>
+(function(){
+  var API='https://cl8.alyeskapos.com/webhook/';
+  var p=new URLSearchParams(location.search), lic=(p.get('lic')||'').trim(), b=(p.get('b')||'').trim(), k=(p.get('k')||'').trim();
+  var B=[['open','Already open'],['within_1m','Within a month'],['1_3m','1–3 months'],['3_6m','3–6 months'],['6m_plus','6+ months']];
+  var LINE={open:"Great — we'll start watching for your first reviews now, and your page fills in the day one lands.",within_1m:"We'll start watching in a few weeks and email you when the first review lands.",'1_3m':"We'll check back in about six weeks and start scoring once you're open.",'3_6m':"We'll stay quiet until you're closer to opening, then start watching for reviews.",'6m_plus':"We'll stay out of your inbox until about two months before you open."};
+  var H=document.getElementById('h'),M=document.getElementById('msg'),C=document.getElementById('chips'),N=document.getElementById('note'),CTA=document.getElementById('cta');
+  function esc(x){return String(x).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]})}
+  function draw(sel,busy){C.innerHTML=B.map(function(x){return '<button type="button" class="chip'+(x[0]===sel?' on':'')+'" data-b="'+x[0]+'"'+(busy?' disabled':'')+'>'+esc(x[1])+'</button>'}).join('')}
+  function fail(){H.textContent="That link didn't work.";M.innerHTML='The link may have been cut off by your email program. You can answer the same question after you <a href="/claim">claim your listing</a>.';C.innerHTML='';}
+  function send(bucket){
+    draw(bucket,true);
+    fetch(API+'pulse-open',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lic:lic,b:bucket,k:k})})
+      .then(function(r){return r.json()}).then(function(j){
+        if(!j||!j.ok){fail();return;}
+        var got=j.bucket||bucket; draw(got,false);
+        H.textContent=j.kept_owner_answer?'Already answered.':'Thanks — noted.';
+        M.textContent=j.kept_owner_answer?'Your signed-in answer on your Pulse page wins over the email tap, so we kept it.':(LINE[got]||'Noted.');
+        N.textContent='Changed your mind? Tap another answer.'; N.style.display='block';
+        document.getElementById('claimlink').href='/claim?lic='+encodeURIComponent(lic); CTA.style.display='block';
+      }).catch(fail);
+  }
+  if(!/^[A-Za-z0-9-]{3,32}$/.test(lic)||!/^[0-9a-f]{64}$/i.test(k)){fail();return;}
+  C.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('button.chip');if(!t||t.disabled)return;send(t.getAttribute('data-b'))});
+  var ok=B.some(function(x){return x[0]===b});
+  if(ok)send(b);else{draw(null,false);}
+})();
+</script>
+<footer><div class="wrap">
+  <div>© 2026 Pulse · The Alaska Merchant Pulse · Anchorage, Alaska</div>
+  <nav><a href="/how-it-works">How it works</a><a href="/lookup">Find your business</a><a href="/signin">Sign in</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav>
+</div></footer>
+</body>
+</html>
